@@ -1,395 +1,154 @@
 <!doctype html>
-
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Calendrier Gamer — Reprise automatique</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Calendrier Gamer</title>
   <style>
-    /* THEME: gamer neon */
     :root{
-      --bg:#0b0f17;
-      --panel:#0f1724;
-      --accent:#7c3aed; /* purple */
-      --accent2:#06b6d4; /* cyan */
-      --text:#e6eef8;
-      --muted:#98a8bf;
-      --card:#0b1220;
-      --danger:#ef4444;
+      --bg:#0b0f17;--panel:#131a2a;--accent:#7c3aed;--accent2:#06b6d4;
+      --text:#e6eef8;--muted:#98a8bf;--danger:#ef4444;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue';background:radial-gradient(circle at 10% 10%, rgba(124,58,237,0.08), transparent 10%), linear-gradient(180deg,#02030a 0%, #071024 100%);color:var(--text)}
-    .app{max-width:1100px;margin:18px auto;padding:18px;display:grid;grid-template-columns:300px 1fr;gap:18px}
-    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03);padding:16px;border-radius:12px;min-height:300px}
-    header{display:flex;align-items:center;gap:12px}
-    .logo{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:#041124}
-    h1{font-size:18px;margin:0}
-    p.lead{margin:4px 0 12px;color:var(--muted);font-size:13px}/* controls */
-.controls{display:flex;gap:8px;flex-wrap:wrap}
-button,select,input[type='checkbox']{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px}
-.big-btn{padding:12px 14px;font-weight:700}
-.muted{color:var(--muted);font-size:13px}
-
-/* calendar */
-.calendar{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
-.month-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.weekday{padding:8px 6px;text-align:center;color:var(--muted);font-size:13px}
-.day{min-height:100px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,0.02);position:relative;overflow:hidden}
-.day .date{position:absolute;top:6px;right:6px;font-size:12px;color:var(--muted)}
-.day.other-month{opacity:0.35}
-.event{display:block;padding:6px 8px;border-radius:8px;margin-bottom:6px;font-size:13px;color:#031222;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* modal */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:50}
-.modal{background:linear-gradient(180deg,#071026,#02101b);padding:18px;border-radius:12px;width:520px;max-width:94%}
-label{display:block;margin:8px 0 6px;font-size:13px;color:var(--muted)}
-input[type='text'],input[type='datetime-local'],select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text)}
-.row{display:flex;gap:8px}
-.row>div{flex:1}
-.colors{display:flex;gap:8px;margin-top:8px}
-.color-swatch{width:36px;height:28px;border-radius:6px;border:2px solid rgba(255,255,255,0.03);cursor:pointer}
-
-footer{margin-top:12px;color:var(--muted);font-size:13px}
-
-.top-actions{display:flex;gap:8px;align-items:center}
-.search{padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text)}
-.small{padding:6px 8px;font-size:13px}
-
-/* responsive */
-@media (max-width:900px){.app{grid-template-columns:1fr;}.panel{order:2}}
-
-/* gamer accent decorations */
-.neon{box-shadow:0 6px 24px rgba(124,58,237,0.12),0 2px 6px rgba(6,182,212,0.06)}
-
+    body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0}
+    h2{margin:0 0 6px}
+    .app{max-width:1200px;margin:12px auto;padding:12px;display:grid;grid-template-columns:300px 1fr;gap:12px}
+    .panel,.calendar{background:var(--panel);padding:14px;border-radius:12px;box-shadow:0 0 12px rgba(124,58,237,0.2)}
+    button,select,input[type='text'],input[type='datetime-local']{
+      background:#111827;color:var(--text);border:1px solid #1f2937;border-radius:6px;padding:6px;transition:0.2s
+    }
+    button:hover{background:var(--accent);color:white;cursor:pointer}
+    .calendar .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+    .weekday{padding:6px;text-align:center;color:var(--muted);font-size:12px;border-bottom:1px solid #1f2937}
+    .day{min-height:90px;border:1px solid #1f2937;border-radius:6px;padding:4px;position:relative;transition:0.2s}
+    .day .date{position:absolute;top:4px;right:6px;font-size:11px;color:var(--muted)}
+    .day.other-month{opacity:0.3}
+    .event{display:block;margin-top:18px;padding:3px 6px;border-radius:6px;font-size:12px;color:#000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+    .event.done{text-decoration:line-through;opacity:0.6}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:100}
+    .modal{background:var(--panel);padding:14px;border-radius:12px;width:420px;max-width:95%}
   </style>
 </head>
 <body>
   <div class="app">
     <div class="panel">
-      <header>
-        <div class="logo">G</div>
-        <div>
-          <h1>Calendrier Gamer</h1>
-          <p class="lead">Planifie tes sessions, streams et événements — sauvegarde automatique.</p>
-        </div>
-      </header><div style="margin-top:12px" class="controls">
-    <button id="todayBtn" class="big-btn neon">Aujourd'hui</button>
-    <div style="flex:1;display:flex;gap:8px">
-      <input id="search" class="search" placeholder="Rechercher un événement...">
-      <button id="addQuick" class="small">+ Rapide</button>
+      <h2>Options</h2>
+      <button id="addEventBtn">➕ Ajouter</button>
+      <button id="todayBtn">📅 Aujourd’hui</button>
+      <h3 style="margin-top:12px">Événements du jour</h3>
+      <ul id="dayEventsList" style="list-style:none;padding:0;font-size:13px;color:var(--muted)"></ul>
     </div>
-  </div>
-
-  <hr style="border:0;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0">
-
-  <div style="display:flex;flex-direction:column;gap:8px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div class="muted">Filtres</div>
-      <div style="display:flex;gap:8px">
-        <button id="exportBtn" class="small">Exporter</button>
-        <button id="importBtn" class="small">Importer</button>
-        <button id="clearBtn" class="small" style="background:transparent;border:1px dashed rgba(255,255,255,0.04)">Tout effacer</button>
+    <div class="calendar">
+      <div class="month-header">
+        <button id="prevMonth">◀</button>
+        <h2 id="monthYear"></h2>
+        <button id="nextMonth">▶</button>
       </div>
-    </div>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="showWeekends" checked>Week-ends</label>
-      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="showPast">Montrer événements passés</label>
-      <label style="display:flex;align-items:center;gap:8px">Début semaine<select id="weekStart"><option value="1">Lundi</option><option value="0">Dimanche</option></select></label>
-    </div>
-
-    <div style="margin-top:8px">
-      <div class="muted">Categories</div>
-      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-        <button class="small cat" data-cat="game">Partie</button>
-        <button class="small cat" data-cat="stream">Stream</button>
-        <button class="small cat" data-cat="tourney">Tournoi</button>
-        <button class="small cat" data-cat="training">Entrainement</button>
-        <button class="small cat" data-cat="maintenance">MAJ/SERV</button>
-      </div>
-    </div>
-
-  </div>
-
-  <footer>
-    Astuce: utilise l'export/import JSON pour sauvegarder manuellement. Notifications locales disponibles (autorise-les quand le navigateur demande).
-  </footer>
-</div>
-
-<div class="calendar panel neon">
-  <div class="month-header">
-    <div style="display:flex;gap:8px;align-items:center">
-      <button id="prev" class="small">◀</button>
-      <div style="min-width:200px"><strong id="monthLabel">—</strong></div>
-      <button id="next" class="small">▶</button>
-    </div>
-    <div class="top-actions">
-      <select id="viewMode"><option value="month">Mois</option><option value="week">Semaine</option></select>
-      <button id="addEventBtn" class="small">+ Ajouter</button>
+      <div class="grid" id="calendarGrid"></div>
     </div>
   </div>
 
-  <div id="weekdays" class="grid"></div>
-  <div id="daysGrid" class="grid" style="margin-top:8px"></div>
-</div>
-
-  </div>  <!-- Modal -->  <div id="modalBackdrop" class="modal-backdrop">
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal">
       <h3 id="modalTitle">Nouvel événement</h3>
       <label>Titre</label>
-      <input id="evtTitle" type="text" placeholder="Ex: Session Apex">
-      <div class="row">
-        <div>
-          <label>Début</label>
-          <input id="evtStart" type="datetime-local">
-        </div>
-        <div>
-          <label>Fin</label>
-          <input id="evtEnd" type="datetime-local">
-        </div>
+      <input type="text" id="eventTitle">
+      <label>Date & heure</label>
+      <input type="datetime-local" id="eventDate">
+      <div style="margin-top:10px;display:flex;gap:6px">
+        <button id="saveEvent">💾 Sauver</button>
+        <button id="cancelEvent">❌ Annuler</button>
       </div>
-      <label>Catégorie</label>
-      <select id="evtCat"><option value="game">Partie</option><option value="stream">Stream</option><option value="tourney">Tournoi</option><option value="training">Entrainement</option><option value="maintenance">MAJ/SERV</option></select>
-      <label>Description</label>
-      <textarea id="evtDesc" rows="3" placeholder="Détails..."></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-    <div>
-      <label>Couleur</label>
-      <div class="colors" id="colorChoices">
-        <div class="color-swatch" data-color="#7c3aed" style="background:#7c3aed"></div>
-        <div class="color-swatch" data-color="#06b6d4" style="background:#06b6d4"></div>
-        <div class="color-swatch" data-color="#f97316" style="background:#f97316"></div>
-        <div class="color-swatch" data-color="#10b981" style="background:#10b981"></div>
-        <div class="color-swatch" data-color="#ef4444" style="background:#ef4444"></div>
-      </div>
-    </div>
-    <div style="min-width:200px">
-      <label>Répéter</label>
-      <select id="evtRepeat"><option value="none">Aucune</option><option value="daily">Quotidien</option><option value="weekly">Hebdo</option><option value="monthly">Mensuel</option></select>
     </div>
   </div>
 
-  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-    <button id="deleteEvt" class="small" style="display:none;background:transparent;border:1px solid rgba(255,255,255,0.06)">Supprimer</button>
-    <button id="cancelEvt" class="small">Annuler</button>
-    <button id="saveEvt" class="small neon">Enregistrer</button>
-  </div>
-</div>
+<script>
+  const monthYear=document.getElementById('monthYear');
+  const calendarGrid=document.getElementById('calendarGrid');
+  const prevMonth=document.getElementById('prevMonth');
+  const nextMonth=document.getElementById('nextMonth');
+  const todayBtn=document.getElementById('todayBtn');
+  const addEventBtn=document.getElementById('addEventBtn');
+  const modalBackdrop=document.getElementById('modalBackdrop');
+  const saveEvent=document.getElementById('saveEvent');
+  const cancelEvent=document.getElementById('cancelEvent');
+  const eventTitle=document.getElementById('eventTitle');
+  const eventDate=document.getElementById('eventDate');
+  const dayEventsList=document.getElementById('dayEventsList');
 
-  </div>  <input id="importFile" type="file" accept="application/json" style="display:none">  <script>
-    // Simple but feature-rich calendar — single-file app
-    // Data saved in localStorage under key 'gamer_cal_events_v1'
+  let currentDate=new Date();
+  let events=JSON.parse(localStorage.getItem('gamerEvents')||'[]');
+  let editIndex=null;
 
-    const LS_KEY = 'gamer_cal_events_v1';
-    let state = {
-      viewMode: 'month',
-      current: new Date(),
-      events: [],
-      selectedEventId: null
-    };
+  function renderCalendar(){
+    const year=currentDate.getFullYear();
+    const month=currentDate.getMonth();
+    const firstDay=new Date(year,month,1);
+    const lastDay=new Date(year,month+1,0);
+    monthYear.textContent=currentDate.toLocaleString('fr-FR',{month:'long',year:'numeric'});
 
-    // --- Utilities ---
-    function uid(){return Math.random().toString(36).slice(2,9)}
-    function startOfMonth(d){return new Date(d.getFullYear(), d.getMonth(),1)}
-    function endOfMonth(d){return new Date(d.getFullYear(), d.getMonth()+1,0)}
-    function fmtMonth(d){return d.toLocaleString('fr-FR',{month:'long',year:'numeric'})}
-    function fmtDateISOLocal(d){ // for input[type=datetime-local]
-      const pad=(n)=>n.toString().padStart(2,'0');
-      const yyyy=d.getFullYear();
-      const mm=pad(d.getMonth()+1);
-      const dd=pad(d.getDate());
-      const hh=pad(d.getHours());
-      const min=pad(d.getMinutes());
-      return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-    }
+    calendarGrid.innerHTML='';
+    // Ligne avec les jours de la semaine
+    const weekdays=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+    weekdays.forEach(d=>{
+      const wd=document.createElement('div');
+      wd.className="weekday";
+      wd.textContent=d;
+      calendarGrid.appendChild(wd);
+    });
 
-    // --- Persistence ---
-    function load(){
-      try{
-        const raw=localStorage.getItem(LS_KEY);
-        if(raw){ state.events = JSON.parse(raw).map(e=>{e.start=new Date(e.start);e.end=new Date(e.end);return e}) }
-      }catch(e){console.error('Load error',e)}
-    }
-    function save(){
-      const plain=state.events.map(e=>({...e,start:e.start.toISOString(),end:e.end.toISOString()}));
-      localStorage.setItem(LS_KEY,JSON.stringify(plain));
-    }
+    let startDay=(firstDay.getDay()+6)%7; // lundi=0
+    for(let i=0;i<startDay;i++){calendarGrid.appendChild(document.createElement('div'))}
 
-    // --- Rendering ---
-    const monthLabel = document.getElementById('monthLabel');
-    const weekdaysEl = document.getElementById('weekdays');
-    const daysGrid = document.getElementById('daysGrid');
-
-    function renderWeekdays(){
-      weekdaysEl.innerHTML='';
-      const weekStart = parseInt(document.getElementById('weekStart').value,10); // 0 Sunday, 1 Monday
-      const names = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-      for(let i=0;i<7;i++){
-        const idx=(i+weekStart)%7;
-        const div=document.createElement('div');div.className='weekday';div.textContent=names[idx];weekdaysEl.appendChild(div);
-      }
-    }
-
-    function eventsForDay(date){
-      return state.events.filter(ev => {
-        const y=date.getFullYear(),m=date.getMonth(),d=date.getDate();
-        return ev.start.getFullYear()===y && ev.start.getMonth()===m && ev.start.getDate()===d;
+    for(let d=1;d<=lastDay.getDate();d++){
+      const div=document.createElement('div');div.className='day';
+      const span=document.createElement('span');span.className='date';span.textContent=d;div.appendChild(span);
+      const dayEvents=events.filter(e=>{
+        const eDate=new Date(e.date);
+        return eDate.getDate()===d && eDate.getMonth()===month && eDate.getFullYear()===year;
       });
+      dayEvents.forEach(e=>{
+        const ev=document.createElement('div');ev.className='event';if(e.done)ev.classList.add('done');
+        ev.style.background=e.color||"#7c3aed";ev.textContent=e.title;
+        div.appendChild(ev);
+      });
+      div.onclick=()=>showDayEvents(new Date(year,month,d));
+      calendarGrid.appendChild(div);
     }
+    showDayEvents(new Date());
+  }
 
-    function render(){
-      renderWeekdays();
-      daysGrid.innerHTML='';
-      const cur = new Date(state.current);
-      monthLabel.textContent = fmtMonth(cur);
+  function showDayEvents(date){
+    const dayEvents=events.filter(e=>{
+      const eDate=new Date(e.date);
+      return eDate.getDate()===date.getDate() && eDate.getMonth()===date.getMonth() && eDate.getFullYear()===date.getFullYear();
+    });
+    dayEventsList.innerHTML='';
+    if(dayEvents.length===0){dayEventsList.innerHTML='<li>Aucun événement</li>'}
+    else{dayEvents.forEach(e=>{let li=document.createElement('li');li.textContent=`${new Date(e.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} - ${e.title}`;dayEventsList.appendChild(li)})}
+  }
 
-      const ws = parseInt(document.getElementById('weekStart').value,10);
-      const first = startOfMonth(cur);
-      const last = endOfMonth(cur);
-      // compute calendar grid start (start of first week)
-      let gridStart = new Date(first);
-      const dayOfWeek = (first.getDay() - ws + 7)%7;
-      gridStart.setDate(first.getDate() - dayOfWeek);
+  function openModal(e=null,i=null){
+    modalBackdrop.style.display='flex';
+    if(e){eventTitle.value=e.title;eventDate.value=e.date;editIndex=i}
+    else{eventTitle.value='';eventDate.value='';editIndex=null}
+  }
+  function closeModal(){modalBackdrop.style.display='none'}
 
-      const showWeekends = document.getElementById('showWeekends').checked;
-      const showPast = document.getElementById('showPast').checked;
+  saveEvent.onclick=()=>{
+    if(!eventTitle.value||!eventDate.value){alert('Remplis tous les champs');return}
+    const ev={title:eventTitle.value,date:eventDate.value,color:"#7c3aed",done:false};
+    if(editIndex!==null){events[editIndex]=ev}else{events.push(ev)}
+    localStorage.setItem('gamerEvents',JSON.stringify(events));
+    closeModal();renderCalendar();
+  };
+  cancelEvent.onclick=closeModal;
+  addEventBtn.onclick=()=>openModal();
+  prevMonth.onclick=()=>{currentDate.setMonth(currentDate.getMonth()-1);renderCalendar()};
+  nextMonth.onclick=()=>{currentDate.setMonth(currentDate.getMonth()+1);renderCalendar()};
+  todayBtn.onclick=()=>{currentDate=new Date();renderCalendar()};
 
-      // create 6 weeks (42 cells)
-      for(let i=0;i<42;i++){
-        const d = new Date(gridStart);
-        d.setDate(gridStart.getDate() + i);
-        const cell = document.createElement('div');
-        cell.className = 'day' + ((d.getMonth()!==cur.getMonth()) ? ' other-month' : '');
-        // hide weekends if unchecked
-        const weekday = d.getDay();
-        if(!showWeekends && (weekday===0 || weekday===6)){ cell.style.display='none' }
-
-        const dateSpan = document.createElement('div');dateSpan.className='date';dateSpan.textContent = d.getDate();cell.appendChild(dateSpan);
-
-        // events
-        const evs = state.events.filter(ev=>ev.start.getFullYear()===d.getFullYear() && ev.start.getMonth()===d.getMonth() && ev.start.getDate()===d.getDate());
-        evs.sort((a,b)=>a.start-b.start);
-        for(const ev of evs){
-          // skip past if hidden
-          if(!showPast && ev.end < new Date()) continue;
-          const eDiv = document.createElement('div');
-          eDiv.className='event';
-          eDiv.style.background = ev.color || 'linear-gradient(90deg,var(--accent),var(--accent2))';
-          eDiv.textContent = ev.title + ' · ' + (ev.start.getHours().toString().padStart(2,'0'))+':'+ev.start.getMinutes().toString().padStart(2,'0');
-          eDiv.onclick = ()=>openEvent(ev.id);
-          cell.appendChild(eDiv);
-        }
-
-        // click to add
-        cell.ondblclick = ()=>openModalForDate(d);
-
-        daysGrid.appendChild(cell);
-      }
-    }
-
-    // --- Modal logic ---
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const modalTitle = document.getElementById('modalTitle');
-    const evtTitle = document.getElementById('evtTitle');
-    const evtStart = document.getElementById('evtStart');
-    const evtEnd = document.getElementById('evtEnd');
-    const evtCat = document.getElementById('evtCat');
-    const evtDesc = document.getElementById('evtDesc');
-    const evtRepeat = document.getElementById('evtRepeat');
-    const deleteBtn = document.getElementById('deleteEvt');
-    let currentColor = '#7c3aed';
-
-    document.getElementById('addEventBtn').onclick = ()=>openModal();
-    document.getElementById('addQuick').onclick = ()=>{
-      const now=new Date(); openModalWithData({title:'Session rapide',start:now,end:new Date(now.getTime()+60*60*1000),cat:'game',desc:''})
-    }
-
-    function openModal(){ state.selectedEventId = null; modalTitle.textContent='Nouvel événement'; deleteBtn.style.display='none'; evtTitle.value=''; evtDesc.value=''; evtRepeat.value='none'; currentColor='#7c3aed'; evtCat.value='game'; const now=new Date(); evtStart.value=fmtDateISOLocal(now); evtEnd.value=fmtDateISOLocal(new Date(now.getTime()+60*60*1000)); modalBackdrop.style.display='flex'; }
-    function openModalForDate(d){ const start=new Date(d); start.setHours(20,0,0,0); openModalWithData({title:'Session',start:start,end:new Date(start.getTime()+60*60*1000),cat:'game',desc:''}) }
-    function openModalWithData(data){ state.selectedEventId = data.id || null; modalTitle.textContent = data.id ? 'Editer événement' : 'Nouvel événement'; deleteBtn.style.display = data.id ? 'inline-block' : 'none'; evtTitle.value=data.title||''; evtDesc.value=data.desc||''; evtCat.value=data.cat||'game'; evtRepeat.value=data.repeat||'none'; currentColor=data.color||'#7c3aed'; evtStart.value = fmtDateISOLocal(new Date(data.start)); evtEnd.value = fmtDateISOLocal(new Date(data.end)); modalBackdrop.style.display='flex'; }
-
-    document.getElementById('cancelEvt').onclick = ()=>{ modalBackdrop.style.display='none'; state.selectedEventId=null }
-    document.getElementById('saveEvt').onclick = ()=>{
-      const title = evtTitle.value.trim() || 'Sans titre';
-      const start = new Date(evtStart.value);
-      const end = new Date(evtEnd.value);
-      if(end<=start){ alert('La date de fin doit être après la date de début'); return }
-      const ev = { id: state.selectedEventId || uid(), title, start, end, cat:evtCat.value, desc:evtDesc.value, color:currentColor, repeat:evtRepeat.value };
-      if(state.selectedEventId){ const idx = state.events.findIndex(x=>x.id===state.selectedEventId); if(idx>=0) state.events[idx]=ev }
-      else state.events.push(ev);
-      save(); modalBackdrop.style.display='none'; state.selectedEventId=null; render(); scheduleNotificationForEvent(ev);
-    }
-    deleteBtn.onclick = ()=>{
-      if(!state.selectedEventId) return; if(!confirm('Supprimer cet événement ?')) return; state.events = state.events.filter(e=>e.id!==state.selectedEventId); save(); modalBackdrop.style.display='none'; state.selectedEventId=null; render(); }
-
-    // color selection
-    document.getElementById('colorChoices').addEventListener('click', e=>{ const sw = e.target.closest('.color-swatch'); if(!sw) return; currentColor = sw.dataset.color; sw.style.outline='3px solid rgba(255,255,255,0.06)'; })
-
-    // open event detail
-    function openEvent(id){ const ev = state.events.find(e=>e.id===id); if(!ev) return; openModalWithData(ev); }
-
-    // navigation controls
-    document.getElementById('next').onclick = ()=>{ const d = state.current; d.setMonth(d.getMonth()+1); state.current=new Date(d); render(); }
-    document.getElementById('prev').onclick = ()=>{ const d = state.current; d.setMonth(d.getMonth()-1); state.current=new Date(d); render(); }
-    document.getElementById('todayBtn').onclick = ()=>{ state.current = new Date(); render(); }
-
-    // view mode (month/week) -- week not fully implemented (keeps month for simplicity)
-    document.getElementById('viewMode').onchange = e=>{ state.viewMode = e.target.value; render(); }
-
-    // search
-    document.getElementById('search').addEventListener('input', e=>{ const q=e.target.value.toLowerCase(); if(!q){render();return;} // highlight matching events
-      // quick filter: show only days containing matching events
-      daysGrid.querySelectorAll('.day').forEach(day=>{const txt=day.textContent.toLowerCase(); day.style.display = txt.includes(q) ? '' : 'none'})
-    })
-
-    // filters change => rerender
-    document.getElementById('showWeekends').onchange = render;
-    document.getElementById('showPast').onchange = render;
-    document.getElementById('weekStart').onchange = render;
-
-    // export/import
-    document.getElementById('exportBtn').onclick = ()=>{
-      const plain=state.events.map(e=>({...e,start:e.start.toISOString(),end:e.end.toISOString()}));
-      const blob = new Blob([JSON.stringify(plain, null, 2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download = 'calendrier_gamer_export.json'; a.click(); URL.revokeObjectURL(url);
-    }
-    document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
-    document.getElementById('importFile').onchange = (e)=>{
-      const f=e.target.files[0]; if(!f) return; const reader=new FileReader(); reader.onload = ()=>{
-        try{ const arr=JSON.parse(reader.result); state.events = arr.map(a=>({ ...a, start:new Date(a.start), end:new Date(a.end), id:a.id||uid()})); save(); render(); alert('Import terminé'); }
-        catch(err){ alert('Fichier invalide') }
-      }; reader.readAsText(f);
-    }
-    document.getElementById('clearBtn').onclick = ()=>{ if(confirm('Supprimer tous les événements ?')){ state.events=[]; save(); render(); }}
-
-    // keyboard shortcuts
-    window.addEventListener('keydown', e=>{
-      if(e.key==='n' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); openModal(); }
-      if(e.key==='/' ){ document.getElementById('search').focus(); }
-    })
-
-    // notifications: simple scheduling for events within a day
-    function scheduleNotificationForEvent(ev){
-      if(!('Notification' in window)) return;
-      if(Notification.permission==='granted'){
-        const now = Date.now(); const ms = ev.start.getTime() - now - (5*60*1000); // 5min before
-        if(ms>0 && ms<7*24*3600*1000){ // schedule only for next week
-          setTimeout(()=> new Notification('Rappel: '+ev.title, {body: ev.desc || 'Événement à venir', tag: ev.id}), ms);
-        }
-      } else if(Notification.permission!=='denied'){
-        Notification.requestPermission().then(perm=>{ if(perm==='granted'){ scheduleNotificationForEvent(ev) } })
-      }
-    }
-
-    // schedule upcoming events currently stored
-    function scheduleAll(){ state.events.forEach(scheduleNotificationForEvent) }
-
-    // init
-    load(); render(); scheduleAll();
-
-    // some sample events if empty
-    if(state.events.length===0){ state.events.push({id:uid(),title:'Soirée FPS',start:new Date(new Date().setHours(20,0,0,0)),end:new Date(new Date().setHours(23,0,0,0)),cat:'game',desc:'Matchs en squad',color:'#7c3aed',repeat:'none'}); save(); render(); }
-
-  </script></body>
+  renderCalendar();
+</script>
+</body>
 </html>
