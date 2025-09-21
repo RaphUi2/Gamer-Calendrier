@@ -1,230 +1,251 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>Calendrier Gamer</title>
-  <style>
-    :root{
-      --bg:#0b0f17;--panel:#131a2a;--accent:#7c3aed;--accent2:#06b6d4;
-      --text:#e6eef8;--muted:#98a8bf;--danger:#ef4444;
-    }
-    body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0}
-    h2{margin:0 0 6px}
-    .app{max-width:1200px;margin:12px auto;padding:12px;display:grid;grid-template-columns:300px 1fr;gap:12px}
-    .panel,.calendar{background:var(--panel);padding:14px;border-radius:12px;box-shadow:0 0 12px rgba(124,58,237,0.2)}
-    button,select,input[type='text'],input[type='datetime-local']{
-      background:#111827;color:var(--text);border:1px solid #1f2937;border-radius:6px;padding:6px;transition:0.2s
-    }
-    button:hover{background:var(--accent);color:white;cursor:pointer}
-    .calendar .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-    .weekday{padding:6px;text-align:center;color:var(--muted);font-size:12px;border-bottom:1px solid #1f2937}
-    .day{min-height:90px;border:1px solid #1f2937;border-radius:6px;padding:4px;position:relative;transition:0.2s}
-    .day .date{position:absolute;top:4px;right:6px;font-size:11px;color:var(--muted)}
-    .day.other-month{opacity:0.3}
-    .event{display:block;margin-top:18px;padding:3px 6px;border-radius:6px;font-size:12px;color:#000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
-    .event.done{text-decoration:line-through;opacity:0.6}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:100}
-    .modal{background:var(--panel);padding:14px;border-radius:12px;width:420px;max-width:95%}
-    li.done{text-decoration:line-through;opacity:0.6}
-    .actions{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Calendrier Gamer</title>
+<style>
+:root{
+  --bg:#0b0f17;--panel:#131a2a;--accent:#7c3aed;--accent2:#06b6d4;
+  --text:#e6eef8;--muted:#98a8bf;--danger:#ef4444;--today:#10b981;
+}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0}
+h2{margin:0 0 6px}
+.app{max-width:1200px;margin:12px auto;padding:12px;display:grid;grid-template-columns:300px 1fr;gap:12px}
+.panel,.calendar{background:var(--panel);padding:14px;border-radius:12px;box-shadow:0 0 12px rgba(124,58,237,0.2)}
+button,select,input[type='text'],input[type='datetime-local'],input[type='color'],select.filter{
+  background:#111827;color:var(--text);border:1px solid #1f2937;border-radius:6px;padding:6px;transition:0.2s
+}
+button:hover{background:var(--accent);color:white;cursor:pointer}
+.calendar .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.weekday{padding:6px;text-align:center;color:var(--muted);font-size:12px;border-bottom:1px solid #1f2937}
+.day{min-height:90px;border:1px solid #1f2937;border-radius:6px;padding:4px;position:relative;transition:0.2s}
+.day .date{position:absolute;top:4px;right:6px;font-size:11px;color:var(--muted)}
+.day.other-month{opacity:0.3}
+.day.today{border:2px solid var(--today)}
+.event{display:block;margin-top:18px;padding:3px 6px;border-radius:6px;font-size:12px;color:#000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.event.done{text-decoration:line-through;opacity:0.6}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:100}
+.modal{background:var(--panel);padding:14px;border-radius:12px;width:420px;max-width:95%}
+li.done{text-decoration:line-through;opacity:0.6}
+.actions{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+</style>
 </head>
 <body>
-  <div class="app">
-    <div class="panel">
-      <h2>Options</h2>
-      <button id="addEventBtn">➕ Ajouter</button>
-      <button id="todayBtn">📅 Aujourd’hui</button>
-      <div class="actions">
-        <button id="exportBtn">⬇️ Export JSON</button>
-        <button id="importBtn">⬆️ Import JSON</button>
-        <input type="file" id="importFile" style="display:none" />
-        <button id="clearAll">🗑️ Tout effacer</button>
-      </div>
-      <h3 style="margin-top:12px">Événements du jour</h3>
-      <ul id="dayEventsList" style="list-style:none;padding:0;font-size:13px;color:var(--muted)"></ul>
-      <p id="eventCount" style="margin-top:10px;font-size:13px;color:var(--muted)"></p>
+<div class="app">
+  <div class="panel">
+    <h2>Options</h2>
+    <button id="addEventBtn">➕ Ajouter</button>
+    <button id="todayBtn">📅 Aujourd’hui</button>
+    <div style="margin-top:10px;">
+      <input type="text" id="searchEvent" placeholder="🔍 Rechercher..." style="width:100%;"/>
     </div>
-    <div class="calendar">
-      <div class="month-header">
-        <button id="prevMonth">◀</button>
-        <h2 id="monthYear"></h2>
-        <button id="nextMonth">▶</button>
-      </div>
-      <div class="grid" id="calendarGrid"></div>
+    <div class="actions">
+      <button id="exportBtn">⬇️ Export JSON</button>
+      <button id="importBtn">⬆️ Import JSON</button>
+      <input type="file" id="importFile" style="display:none" />
+      <button id="clearAll">🗑️ Tout effacer</button>
     </div>
+    <h3 style="margin-top:12px">Événements du jour</h3>
+    <ul id="dayEventsList" style="list-style:none;padding:0;font-size:13px;color:var(--muted)"></ul>
+    <p id="eventCount" style="margin-top:10px;font-size:13px;color:var(--muted)"></p>
   </div>
+  <div class="calendar">
+    <div class="month-header">
+      <button id="prevMonth">◀</button>
+      <h2 id="monthYear"></h2>
+      <button id="nextMonth">▶</button>
+    </div>
+    <div class="grid" id="calendarGrid"></div>
+  </div>
+</div>
 
-  <!-- Modal -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal">
-      <h3 id="modalTitle">Nouvel événement</h3>
-      <label>Titre</label>
-      <input type="text" id="eventTitle">
-      <label>Date & heure</label>
-      <input type="datetime-local" id="eventDate">
-      <div style="margin-top:10px;display:flex;gap:6px">
-        <button id="saveEvent">💾 Sauver</button>
-        <button id="cancelEvent">❌ Annuler</button>
-      </div>
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3 id="modalTitle">Nouvel événement</h3>
+    <label>Titre</label>
+    <input type="text" id="eventTitle">
+    <label>Date & heure</label>
+    <input type="datetime-local" id="eventDate">
+    <label>Couleur</label>
+    <input type="color" id="eventColor" value="#7c3aed">
+    <label>Répéter</label>
+    <select id="eventRepeat">
+      <option value="none">Aucun</option>
+      <option value="daily">Quotidien</option>
+      <option value="weekly">Hebdomadaire</option>
+      <option value="monthly">Mensuel</option>
+    </select>
+    <div style="margin-top:10px;display:flex;gap:6px">
+      <button id="saveEvent">💾 Sauver</button>
+      <button id="cancelEvent">❌ Annuler</button>
     </div>
   </div>
+</div>
 
 <script>
-  const monthYear=document.getElementById('monthYear');
-  const calendarGrid=document.getElementById('calendarGrid');
-  const prevMonth=document.getElementById('prevMonth');
-  const nextMonth=document.getElementById('nextMonth');
-  const todayBtn=document.getElementById('todayBtn');
-  const addEventBtn=document.getElementById('addEventBtn');
-  const modalBackdrop=document.getElementById('modalBackdrop');
-  const saveEvent=document.getElementById('saveEvent');
-  const cancelEvent=document.getElementById('cancelEvent');
-  const eventTitle=document.getElementById('eventTitle');
-  const eventDate=document.getElementById('eventDate');
-  const dayEventsList=document.getElementById('dayEventsList');
-  const eventCount=document.getElementById('eventCount');
-  const clearAll=document.getElementById('clearAll');
-  const exportBtn=document.getElementById('exportBtn');
-  const importBtn=document.getElementById('importBtn');
-  const importFile=document.getElementById('importFile');
+const monthYear=document.getElementById('monthYear');
+const calendarGrid=document.getElementById('calendarGrid');
+const prevMonth=document.getElementById('prevMonth');
+const nextMonth=document.getElementById('nextMonth');
+const todayBtn=document.getElementById('todayBtn');
+const addEventBtn=document.getElementById('addEventBtn');
+const modalBackdrop=document.getElementById('modalBackdrop');
+const saveEvent=document.getElementById('saveEvent');
+const cancelEvent=document.getElementById('cancelEvent');
+const eventTitle=document.getElementById('eventTitle');
+const eventDate=document.getElementById('eventDate');
+const eventColor=document.getElementById('eventColor');
+const eventRepeat=document.getElementById('eventRepeat');
+const dayEventsList=document.getElementById('dayEventsList');
+const eventCount=document.getElementById('eventCount');
+const clearAll=document.getElementById('clearAll');
+const exportBtn=document.getElementById('exportBtn');
+const importBtn=document.getElementById('importBtn');
+const importFile=document.getElementById('importFile');
+const searchEvent=document.getElementById('searchEvent');
 
-  let currentDate=new Date();
-  let events=JSON.parse(localStorage.getItem('gamerEvents')||'[]');
-  let editIndex=null;
+let currentDate=new Date();
+let events=JSON.parse(localStorage.getItem('gamerEvents')||'[]');
+let editIndex=null;
 
-  function renderCalendar(){
-    const year=currentDate.getFullYear();
-    const month=currentDate.getMonth();
-    const firstDay=new Date(year,month,1);
-    const lastDay=new Date(year,month+1,0);
-    monthYear.textContent=currentDate.toLocaleString('fr-FR',{month:'long',year:'numeric'});
+// ==== Fonctions ====
+function renderCalendar(){
+  const year=currentDate.getFullYear();
+  const month=currentDate.getMonth();
+  const firstDay=new Date(year,month,1);
+  const lastDay=new Date(year,month+1,0);
+  monthYear.textContent=currentDate.toLocaleString('fr-FR',{month:'long',year:'numeric'});
 
-    calendarGrid.innerHTML='';
-    const weekdays=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
-    weekdays.forEach(d=>{
-      const wd=document.createElement('div');
-      wd.className="weekday";
-      wd.textContent=d;
-      calendarGrid.appendChild(wd);
-    });
+  calendarGrid.innerHTML='';
+  const weekdays=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  weekdays.forEach(d=>{
+    const wd=document.createElement('div'); wd.className="weekday"; wd.textContent=d;
+    calendarGrid.appendChild(wd);
+  });
 
-    let startDay=(firstDay.getDay()+6)%7; // lundi=0
-    for(let i=0;i<startDay;i++){calendarGrid.appendChild(document.createElement('div'))}
+  let startDay=(firstDay.getDay()+6)%7;
+  for(let i=0;i<startDay;i++) calendarGrid.appendChild(document.createElement('div'));
 
-    for(let d=1;d<=lastDay.getDate();d++){
-      const div=document.createElement('div');div.className='day';
-      const span=document.createElement('span');span.className='date';span.textContent=d;div.appendChild(span);
-      const dayEvents=events.filter(e=>{
-        const eDate=new Date(e.date);
-        return eDate.getDate()===d && eDate.getMonth()===month && eDate.getFullYear()===year;
-      });
-      dayEvents.forEach(e=>{
-        const ev=document.createElement('div');ev.className='event';if(e.done)ev.classList.add('done');
-        ev.style.background=e.color||"#7c3aed";ev.textContent=e.title;
-        div.appendChild(ev);
-      });
-      div.onclick=()=>showDayEvents(new Date(year,month,d));
-      calendarGrid.appendChild(div);
-    }
-    updateCount();
-    showDayEvents(new Date());
-  }
+  for(let d=1;d<=lastDay.getDate();d++){
+    const div=document.createElement('div'); div.className='day';
+    const span=document.createElement('span'); span.className='date'; span.textContent=d; div.appendChild(span);
 
-  function showDayEvents(date){
     const dayEvents=events.filter(e=>{
       const eDate=new Date(e.date);
-      return eDate.getDate()===date.getDate() && eDate.getMonth()===date.getMonth() && eDate.getFullYear()===date.getFullYear();
+      return eDate.getDate()===d && eDate.getMonth()===month && eDate.getFullYear()===year;
+    }).sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+    dayEvents.forEach(e=>{
+      const ev=document.createElement('div'); ev.className='event'; if(e.done) ev.classList.add('done');
+      ev.style.background=e.color||"#7c3aed"; ev.textContent=e.title;
+      div.appendChild(ev);
     });
-    dayEventsList.innerHTML='';
-    if(dayEvents.length===0){dayEventsList.innerHTML='<li>Aucun événement</li>'}
-    else{
-      dayEvents.forEach((e,i)=>{
-        let li=document.createElement('li');
-        li.textContent=`${new Date(e.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} - ${e.title}`;
-        if(e.done) li.classList.add("done");
 
-        let btnDone=document.createElement("button");
-        btnDone.textContent="✔️";
-        btnDone.onclick=()=>{e.done=!e.done;saveEvents();renderCalendar()};
+    const today=new Date();
+    if(d===today.getDate() && month===today.getMonth() && year===today.getFullYear()) div.classList.add('today');
 
-        let btnDel=document.createElement("button");
-        btnDel.textContent="🗑️";
-        btnDel.onclick=()=>{events=events.filter(ev=>ev!==e);saveEvents();renderCalendar()};
-
-        li.append(" ",btnDone," ",btnDel);
-        dayEventsList.appendChild(li);
-      })
-    }
+    div.onclick=()=>showDayEvents(new Date(year,month,d));
+    calendarGrid.appendChild(div);
   }
 
-  function openModal(e=null,i=null){
-    modalBackdrop.style.display='flex';
-    if(e){eventTitle.value=e.title;eventDate.value=e.date;editIndex=i}
-    else{eventTitle.value='';eventDate.value='';editIndex=null}
-  }
-  function closeModal(){modalBackdrop.style.display='none'}
+  updateCount();
+  showDayEvents(new Date());
+}
 
-  function saveEvents(){localStorage.setItem('gamerEvents',JSON.stringify(events))}
+function showDayEvents(date){
+  let dayEvents=events.filter(e=>{
+    const eDate=new Date(e.date);
+    return eDate.getDate()===date.getDate() && eDate.getMonth()===date.getMonth() && eDate.getFullYear()===date.getFullYear();
+  }).sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-  saveEvent.onclick=()=>{
-    if(!eventTitle.value||!eventDate.value){alert('Remplis tous les champs');return}
-    const ev={title:eventTitle.value,date:eventDate.value,color:"#7c3aed",done:false};
-    if(editIndex!==null){events[editIndex]=ev}else{events.push(ev)}
-    saveEvents();closeModal();renderCalendar();
-  };
-  cancelEvent.onclick=closeModal;
-  addEventBtn.onclick=()=>openModal();
-  prevMonth.onclick=()=>{currentDate.setMonth(currentDate.getMonth()-1);renderCalendar()};
-  nextMonth.onclick=()=>{currentDate.setMonth(currentDate.getMonth()+1);renderCalendar()};
-  todayBtn.onclick=()=>{currentDate=new Date();renderCalendar()};
-  clearAll.onclick=()=>{if(confirm("Tout effacer ?")){events=[];saveEvents();renderCalendar()}};
+  const filterText=searchEvent.value.toLowerCase();
+  if(filterText) dayEvents=dayEvents.filter(e=>e.title.toLowerCase().includes(filterText));
 
-  exportBtn.onclick=()=>{
-    const data=JSON.stringify(events);
-    const blob=new Blob([data],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;a.download="calendrier_gamer.json";a.click();
-    URL.revokeObjectURL(url);
-  };
-  importBtn.onclick=()=>importFile.click();
-  importFile.onchange=(e)=>{
-    const file=e.target.files[0];if(!file)return;
-    const reader=new FileReader();
-    reader.onload=ev=>{events=JSON.parse(ev.target.result);saveEvents();renderCalendar()};
-    reader.readAsText(file);
-  };
+  dayEventsList.innerHTML='';
+  if(dayEvents.length===0){dayEventsList.innerHTML='<li>Aucun événement</li>'}
+  else{
+    dayEvents.forEach((e,i)=>{
+      const li=document.createElement('li');
+      li.textContent=`${new Date(e.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} - ${e.title}`;
+      if(e.done) li.classList.add("done");
 
-  function updateCount(){
-    let done=events.filter(e=>e.done).length;
-    eventCount.textContent=`Total : ${events.length} | Terminés : ${done}`;
-  }
+      const btnDone=document.createElement("button"); btnDone.textContent="✔️";
+      btnDone.onclick=()=>{e.done=!e.done;saveEvents();renderCalendar()};
 
-  // === Notifications ===
-  if("Notification" in window && Notification.permission!=="granted"){
-    Notification.requestPermission();
-  }
+      const btnDel=document.createElement("button"); btnDel.textContent="🗑️";
+      btnDel.onclick=()=>{events=events.filter(ev=>ev!==e);saveEvents();renderCalendar()};
 
-  function checkNotifications(){
-    if(!("Notification" in window) || Notification.permission!=="granted") return;
-    const now=new Date();
-    events.forEach(e=>{
-      if(e.notified) return;
-      const eventTime=new Date(e.date).getTime();
-      const diff=(eventTime-now.getTime())/60000; // minutes
-      if(diff<=10 && diff>0 && !e.done){
-        new Notification("⏰ Événement bientôt !",{body:e.title+" dans "+Math.round(diff)+" minutes"});
-        e.notified=true;
-        saveEvents();
-      }
+      li.append(" ",btnDone," ",btnDel);
+      dayEventsList.appendChild(li);
     })
   }
+}
 
-  setInterval(checkNotifications,60000); // check chaque minute
+function openModal(e=null,i=null){
+  modalBackdrop.style.display='flex';
+  if(e){eventTitle.value=e.title;eventDate.value=e.date;eventColor.value=e.color||"#7c3aed"; eventRepeat.value=e.repeat||"none"; editIndex=i}
+  else{eventTitle.value='';eventDate.value='';eventColor.value="#7c3aed"; eventRepeat.value="none"; editIndex=null}
+}
+function closeModal(){modalBackdrop.style.display='none'}
 
-  renderCalendar();
+function saveEvents(){localStorage.setItem('gamerEvents',JSON.stringify(events))}
+
+// ==== Actions ====
+saveEvent.onclick=()=>{
+  if(!eventTitle.value||!eventDate.value){alert('Remplis tous les champs'); return}
+  const ev={title:eventTitle.value,date:eventDate.value,color:eventColor.value,done:false,repeat:eventRepeat.value};
+  if(editIndex!==null) events[editIndex]=ev; else events.push(ev);
+  saveEvents(); closeModal(); renderCalendar();
+};
+cancelEvent.onclick=closeModal;
+addEventBtn.onclick=()=>openModal();
+prevMonth.onclick=()=>{currentDate.setMonth(currentDate.getMonth()-1);renderCalendar()};
+nextMonth.onclick=()=>{currentDate.setMonth(currentDate.getMonth()+1);renderCalendar()};
+todayBtn.onclick=()=>{currentDate=new Date();renderCalendar()};
+clearAll.onclick=()=>{if(confirm("Tout effacer ?")){events=[];saveEvents();renderCalendar()}};
+exportBtn.onclick=()=>{
+  const data=JSON.stringify(events);
+  const blob=new Blob([data],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download="calendrier_gamer.json"; a.click();
+  URL.revokeObjectURL(url);
+};
+importBtn.onclick=()=>importFile.click();
+importFile.onchange=(e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{events=JSON.parse(ev.target.result);saveEvents();renderCalendar()};
+  reader.readAsText(file);
+};
+searchEvent.oninput=()=>renderCalendar();
+
+function updateCount(){
+  const done=events.filter(e=>e.done).length;
+  eventCount.textContent=`Total : ${events.length} | Terminés : ${done}`;
+}
+
+// ==== Notifications ====
+if("Notification" in window && Notification.permission!=="granted"){Notification.requestPermission();}
+
+function checkNotifications(){
+  if(!("Notification" in window) || Notification.permission!=="granted") return;
+  const now=new Date();
+  events.forEach(e=>{
+    if(e.notified) return;
+    const eventTime=new Date(e.date).getTime();
+    const diff=(eventTime-now.getTime())/60000;
+    if(diff<=10 && diff>0 && !e.done){
+      new Notification("⏰ Événement bientôt !",{body:e.title+" dans "+Math.round(diff)+" minutes"});
+      e.notified=true;
+      saveEvents();
+    }
+  });
+}
+setInterval(checkNotifications,60000);
+
+renderCalendar();
 </script>
 </body>
 </html>
