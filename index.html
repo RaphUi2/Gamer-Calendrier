@@ -23,12 +23,15 @@ button:hover{background:var(--accent);color:white;cursor:pointer}
 .day .date{position:absolute;top:4px;right:6px;font-size:11px;color:var(--muted)}
 .day.other-month{opacity:0.3}
 .day.today{border:2px solid var(--today)}
+.day.expired{opacity:0.4}
 .event{display:block;margin-top:18px;padding:3px 6px;border-radius:6px;font-size:12px;color:#000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
 .event.done{text-decoration:line-through;opacity:0.6}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:100}
 .modal{background:var(--panel);padding:14px;border-radius:12px;width:420px;max-width:95%}
 li.done{text-decoration:line-through;opacity:0.6}
 .actions{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.progress-bar{background:#111827;border-radius:6px;height:8px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:var(--accent)}
 </style>
 </head>
 <body>
@@ -40,6 +43,23 @@ li.done{text-decoration:line-through;opacity:0.6}
     <div style="margin-top:10px;">
       <input type="text" id="searchEvent" placeholder="🔍 Rechercher..." style="width:100%;"/>
     </div>
+    <div style="margin-top:10px;">
+      <select id="filterColor" class="filter">
+        <option value="">Filtrer par couleur</option>
+      </select>
+      <select id="filterRepeat" class="filter">
+        <option value="">Filtrer par répétition</option>
+        <option value="none">Aucun</option>
+        <option value="daily">Quotidien</option>
+        <option value="weekly">Hebdomadaire</option>
+        <option value="monthly">Mensuel</option>
+      </select>
+      <select id="filterDone" class="filter">
+        <option value="">Filtrer par statut</option>
+        <option value="done">Terminés</option>
+        <option value="pending">En cours</option>
+      </select>
+    </div>
     <div class="actions">
       <button id="exportBtn">⬇️ Export JSON</button>
       <button id="importBtn">⬆️ Import JSON</button>
@@ -49,6 +69,9 @@ li.done{text-decoration:line-through;opacity:0.6}
     <h3 style="margin-top:12px">Événements du jour</h3>
     <ul id="dayEventsList" style="list-style:none;padding:0;font-size:13px;color:var(--muted)"></ul>
     <p id="eventCount" style="margin-top:10px;font-size:13px;color:var(--muted)"></p>
+    <div class="progress-bar"><div class="progress-fill" id="monthProgress"></div></div>
+    <h3 style="margin-top:12px">Prochains événements</h3>
+    <ul id="upcomingEvents" style="list-style:none;padding:0;font-size:13px;color:var(--muted)"></ul>
   </div>
   <div class="calendar">
     <div class="month-header">
@@ -105,6 +128,11 @@ const exportBtn=document.getElementById('exportBtn');
 const importBtn=document.getElementById('importBtn');
 const importFile=document.getElementById('importFile');
 const searchEvent=document.getElementById('searchEvent');
+const filterColor=document.getElementById('filterColor');
+const filterRepeat=document.getElementById('filterRepeat');
+const filterDone=document.getElementById('filterDone');
+const monthProgress=document.getElementById('monthProgress');
+const upcomingEvents=document.getElementById('upcomingEvents');
 
 let currentDate=new Date();
 let events=JSON.parse(localStorage.getItem('gamerEvents')||'[]');
@@ -139,6 +167,7 @@ function renderCalendar(){
 
     dayEvents.forEach(e=>{
       const ev=document.createElement('div'); ev.className='event'; if(e.done) ev.classList.add('done');
+      if(new Date(e.date)<new Date()) div.classList.add('expired');
       ev.style.background=e.color||"#7c3aed"; ev.textContent=e.title;
       div.appendChild(ev);
     });
@@ -152,6 +181,9 @@ function renderCalendar(){
 
   updateCount();
   showDayEvents(new Date());
+  updateMonthProgress();
+  updateUpcomingEvents();
+  populateColorFilter();
 }
 
 function showDayEvents(date){
@@ -162,6 +194,16 @@ function showDayEvents(date){
 
   const filterText=searchEvent.value.toLowerCase();
   if(filterText) dayEvents=dayEvents.filter(e=>e.title.toLowerCase().includes(filterText));
+
+  const colorFilter=filterColor.value;
+  if(colorFilter) dayEvents=dayEvents.filter(e=>e.color===colorFilter);
+
+  const repeatFilter=filterRepeat.value;
+  if(repeatFilter) dayEvents=dayEvents.filter(e=>e.repeat===repeatFilter);
+
+  const doneFilter=filterDone.value;
+  if(doneFilter==='done') dayEvents=dayEvents.filter(e=>e.done);
+  else if(doneFilter==='pending') dayEvents=dayEvents.filter(e=>!e.done);
 
   dayEventsList.innerHTML='';
   if(dayEvents.length===0){dayEventsList.innerHTML='<li>Aucun événement</li>'}
@@ -177,7 +219,10 @@ function showDayEvents(date){
       const btnDel=document.createElement("button"); btnDel.textContent="🗑️";
       btnDel.onclick=()=>{events=events.filter(ev=>ev!==e);saveEvents();renderCalendar()};
 
-      li.append(" ",btnDone," ",btnDel);
+      const btnDup=document.createElement("button"); btnDup.textContent="📄";
+      btnDup.onclick=()=>{events.push({...e,date:new Date().toISOString()}); saveEvents(); renderCalendar()};
+
+      li.append(" ",btnDone," ",btnDel," ",btnDup);
       dayEventsList.appendChild(li);
     })
   }
@@ -220,10 +265,38 @@ importFile.onchange=(e)=>{
   reader.readAsText(file);
 };
 searchEvent.oninput=()=>renderCalendar();
+filterColor.onchange=renderCalendar;
+filterRepeat.onchange=renderCalendar;
+filterDone.onchange=renderCalendar;
 
 function updateCount(){
   const done=events.filter(e=>e.done).length;
   eventCount.textContent=`Total : ${events.length} | Terminés : ${done}`;
+}
+
+function updateMonthProgress(){
+  const today=new Date();
+  const daysInMonth=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();
+  const percent=(today.getDate()/daysInMonth)*100;
+  monthProgress.style.width=percent+"%";
+}
+
+function populateColorFilter(){
+  const colors=[...new Set(events.map(e=>e.color))];
+  filterColor.innerHTML='<option value="">Filtrer par couleur</option>';
+  colors.forEach(c=>filterColor.innerHTML+=`<option value="${c}">${c}</option>`);
+}
+
+function updateUpcomingEvents(){
+  const now=new Date();
+  const upcoming=events.filter(e=>new Date(e.date)>now && !e.done).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,5);
+  upcomingEvents.innerHTML='';
+  if(upcoming.length===0) upcomingEvents.innerHTML='<li>Aucun événement à venir</li>';
+  else upcoming.forEach(e=>{
+    const li=document.createElement('li');
+    li.textContent=`${new Date(e.date).toLocaleString('fr-FR',{hour:'2-digit',minute:'2-digit'})} - ${e.title}`;
+    upcomingEvents.appendChild(li);
+  });
 }
 
 // ==== Notifications ====
